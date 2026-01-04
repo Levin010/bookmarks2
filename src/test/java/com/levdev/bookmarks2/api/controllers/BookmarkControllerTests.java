@@ -20,6 +20,8 @@ import org.testcontainers.utility.DockerImageName;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import java.util.Optional;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Testcontainers
@@ -96,5 +98,47 @@ class BookmarkControllerTests {
                 .put("/api/bookmarks/{id}", bookmark.id())
                 .then()
                 .statusCode(200);
+    }
+
+    @Test
+    void shouldGetBookmarkByIdSuccessfully() {
+        CreateBookmarkCommand cmd = new CreateBookmarkCommand("SivaLabs blog", "https://sivalabs.in");
+        BookmarkDTO bookmark = bookmarkService.create(cmd);
+
+        given().contentType(ContentType.JSON)
+                .when()
+                .get("/api/bookmarks/{id}", bookmark.id())
+                .then()
+                .statusCode(200)
+                .body("id", notNullValue())
+                .body("title", equalTo("SivaLabs blog"))
+                .body("url", equalTo("https://sivalabs.in"))
+                .body("createdAt", notNullValue())
+                .body("updatedAt", nullValue());
+    }
+
+    @Test
+    void shouldGet404WhenBookmarkNotExists() {
+        Long nonExistingId = 99999L;
+        given().contentType(ContentType.JSON)
+                .when()
+                .get("/api/bookmarks/{id}", nonExistingId)
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    void shouldDeleteBookmarkByIdSuccessfully() {
+        CreateBookmarkCommand cmd = new CreateBookmarkCommand("SivaLabs blog", "https://sivalabs.in");
+        BookmarkDTO bookmark = bookmarkService.create(cmd);
+
+        given().contentType(ContentType.JSON)
+                .when()
+                .delete("/api/bookmarks/{id}", bookmark.id())
+                .then()
+                .statusCode(200);
+
+        Optional<BookmarkDTO> optionalBookmark = bookmarkService.findById(bookmark.id());
+        assertThat(optionalBookmark).isEmpty();
     }
 }

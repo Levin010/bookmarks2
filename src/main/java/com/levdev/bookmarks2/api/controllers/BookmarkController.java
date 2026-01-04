@@ -44,4 +44,16 @@ class BookmarkController {
         UpdateBookmarkCommand cmd = new UpdateBookmarkCommand(id, request.title(), request.url());
         bookmarkService.update(cmd);
     }
+
+    @GetMapping("/{id}")
+    ResponseEntity<BookmarkDTO> findById(@PathVariable(name = "id") Long id) {
+        return bookmarkService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    void delete(@PathVariable(name = "id") Long id) {
+        bookmarkService.delete(id);
+    }
 }

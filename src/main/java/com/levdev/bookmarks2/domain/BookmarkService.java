@@ -7,6 +7,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @Transactional(readOnly = true)
 public class BookmarkService {
@@ -49,5 +51,16 @@ public class BookmarkService {
         bookmark.setTitle(cmd.title());
         bookmark.setUrl(cmd.url());
         repo.save(bookmark);
+    }
+
+    public Optional<BookmarkDTO> findById(Long id) {
+        return repo.findBookmarkById(id);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        Bookmark entity = repo.findById(id)
+                .orElseThrow(() -> BookmarkNotFoundException.of(id));
+        repo.delete(entity);
     }
 }
