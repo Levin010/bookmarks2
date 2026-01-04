@@ -18,7 +18,6 @@ public class BookmarkService {
 
     public PagedResult<BookmarkDTO> findBookmarks(FindBookmarksQuery query) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-        // User page numbering starts from 1, Spring Data starts from 0
         int pageNo = query.pageNo() > 0 ? query.pageNo() - 1 : 0;
         Pageable pageable = PageRequest.of(pageNo, query.pageSize(), sort);
         Page<BookmarkDTO> page = repo.findBookmarks(pageable);
@@ -26,12 +25,29 @@ public class BookmarkService {
         return new PagedResult<>(
                 page.getContent(),
                 page.getTotalElements(),
-                page.getNumber() + 1, // Convert back to user-facing page number
+                page.getNumber() + 1,
                 page.getTotalPages(),
                 page.isFirst(),
                 page.isLast(),
                 page.hasNext(),
                 page.hasPrevious()
         );
+    }
+
+    @Transactional
+    public BookmarkDTO create(CreateBookmarkCommand cmd) {
+        Bookmark bookmark = new Bookmark();
+        bookmark.setTitle(cmd.title());
+        bookmark.setUrl(cmd.url());
+        return BookmarkDTO.from(repo.save(bookmark));
+    }
+
+    @Transactional
+    public void update(UpdateBookmarkCommand cmd) {
+        Bookmark bookmark = repo.findById(cmd.id())
+                .orElseThrow(() -> BookmarkNotFoundException.of(cmd.id()));
+        bookmark.setTitle(cmd.title());
+        bookmark.setUrl(cmd.url());
+        repo.save(bookmark);
     }
 }

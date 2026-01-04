@@ -1,10 +1,14 @@
 package com.levdev.bookmarks2.domain;
 
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.Instant;
 
 @Entity
 @Table(name = "bookmarks")
+@EntityListeners(AuditingEntityListener.class)
 class Bookmark {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,15 +21,15 @@ class Bookmark {
     private String url;
 
     @Column(name = "created_at", nullable = false, updatable = false)
+    @CreatedDate
     private Instant createdAt;
 
     @Column(name = "updated_at", insertable = false)
+    @LastModifiedDate
     private Instant updatedAt;
 
-    // Default constructor
     public Bookmark() {}
 
-    // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

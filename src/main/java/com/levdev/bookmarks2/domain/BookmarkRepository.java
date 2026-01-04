@@ -7,7 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 
 interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     @Query("""
-           SELECT new com.levdev.bookmarks2.domain.BookmarkDTO(b.id, b.title, b.url, b.createdAt)
+           SELECT new com.levdev.bookmarks2.domain.BookmarkDTO(
+               b.id, b.title, b.url, b.createdAt, b.updatedAt
+           )
            FROM Bookmark b
            """)
     Page<BookmarkDTO> findBookmarks(Pageable pageable);
